@@ -1,5 +1,11 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import PaymentViewSet, UserProfileAPIView  # Импортируем новый вью
+
+router = DefaultRouter()
+router.register(r'payments', PaymentViewSet)
 
 urlpatterns = [
-
+    path('', include(router.urls)),
+    path('profile/', UserProfileAPIView.as_view(), name='user-profile'),
 ]
