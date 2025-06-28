@@ -1,10 +1,12 @@
 from django.db import models
+from django.conf import settings
 
 
 class Course(models.Model):
     title = models.CharField(max_length=255)
     preview = models.ImageField(upload_to='course_previews/', blank=True, null=True)
     description = models.TextField()
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Курс'
@@ -20,6 +22,7 @@ class Lesson(models.Model):
     preview = models.ImageField(upload_to='lesson_previews/', blank=True, null=True)
     video_url = models.URLField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Урок'
