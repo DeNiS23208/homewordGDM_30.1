@@ -11,8 +11,8 @@ class PaymentViewSet(ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ['course', 'lesson', 'payment_method']
-    ordering_fields = ['payment_date']
+    filterset_fields = ["course", "lesson", "payment_method"]
+    ordering_fields = ["payment_date"]
 
 
 class UserProfileAPIView(RetrieveAPIView):
@@ -30,6 +30,6 @@ class UserViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
-        if self.action == 'create':
+        if self.action == "create":
             return [AllowAny()]
         return super().get_permissions()
