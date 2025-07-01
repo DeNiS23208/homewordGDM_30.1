@@ -30,3 +30,11 @@ class Lesson(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.course.title})"
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='subscriptions')
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='subscriptions')
+
+    def __str__(self):
+        return f'{self.user.email} подписан на {self.course.title}'
