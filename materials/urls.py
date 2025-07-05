@@ -3,7 +3,10 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     CourseViewSet,
     LessonListCreateAPIView,
-    LessonRetrieveUpdateDestroyAPIView, SubscriptionCreateAPIView, SubscriptionDeleteAPIView
+    LessonRetrieveUpdateDestroyAPIView,
+    SubscriptionCreateAPIView,
+    SubscriptionDeleteAPIView,
+    StripePaymentAPIView,
 )
 
 router = DefaultRouter()
@@ -17,6 +20,15 @@ urlpatterns = [
         LessonRetrieveUpdateDestroyAPIView.as_view(),
         name="lesson-detail",
     ),
-    path('subscriptions/', SubscriptionCreateAPIView.as_view(), name='subscription-create'),
-    path('subscriptions/<int:pk>/', SubscriptionDeleteAPIView.as_view(), name='subscription-delete'),
+    path(
+        "subscriptions/",
+        SubscriptionCreateAPIView.as_view(),
+        name="subscription-create",
+    ),
+    path(
+        "subscriptions/<int:pk>/",
+        SubscriptionDeleteAPIView.as_view(),
+        name="subscription-delete",
+    ),
+    path("stripe-payment/", StripePaymentAPIView.as_view(), name="stripe-payment"),
 ]

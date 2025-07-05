@@ -1,13 +1,20 @@
 from rest_framework import generics
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
 from users.permissions import IsModeratorCanOnlyChange, IsOwnerOrReadOnly
 from rest_framework.permissions import IsAuthenticated
 from .models import Subscription
 from .serializers import SubscriptionSerializer
 from .paginators import MyPagination
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .stripe_service import (
+    create_stripe_product,
+    create_stripe_price,
+    create_stripe_session,
+)
+from .models import Course, Payment, Lesson
 
 
 class CourseViewSet(ModelViewSet):
@@ -68,3 +75,37 @@ class SubscriptionDeleteAPIView(generics.DestroyAPIView):
 
     def get_queryset(self):
         return Subscription.objects.filter(user=self.request.user)
+
+
+class StripePaymentAPIView(APIView):
+    """
+    Вьюшка для создания Stripe оплаты
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        course_id = request.data.get("course_id")
+        if not course_id:
+            return Response({"error": "Не передан id курса"}, status=400)
+
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return Response({"error": "Курс не найден"}, status=404)
+
+        product = create_stripe_product(course.title)
+
+        price = create_stripe_price(product.id, int(course.price))
+
+        session = create_stripe_session(price.id)
+
+        payment = Payment.objects.create(
+            user=request.user,
+            course=course,
+            amount=course.price,
+            payment_method="card",
+            payment_url=session.url,
+        )
+
+        return Response({"payment_url": session.url})
