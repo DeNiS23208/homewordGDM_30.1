@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "materials",
     "rest_framework_simplejwt",
     "drf_spectacular",
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -140,3 +141,7 @@ REST_FRAMEWORK = {
 STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
 STRIPE_SUCCESS_URL = "http://localhost:8000/success/"
 STRIPE_CANCEL_URL = "http://localhost:8000/cancel/"
+
+
+CELERY_BROKER_URL=os.getenv('REDIS_URL')
+CELERY_TIMEZONE = 'Europe/Moscow'
