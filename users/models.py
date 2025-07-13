@@ -48,14 +48,24 @@ class Payment(models.Model):
     ]
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="payments"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="payments_from_users",
     )
     payment_date = models.DateTimeField(auto_now_add=True)
     course = models.ForeignKey(
-        Course, on_delete=models.CASCADE, blank=True, null=True, related_name="payments"
+        Course,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="payments_from_users",
     )
     lesson = models.ForeignKey(
-        Lesson, on_delete=models.CASCADE, blank=True, null=True, related_name="payments"
+        Lesson,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="payments_from_users",
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES)
