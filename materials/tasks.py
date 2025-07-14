@@ -2,6 +2,8 @@ from celery import shared_task
 from django.core.mail import send_mail
 from django.utils import timezone
 from datetime import timedelta
+
+from lms_project import settings
 from .models import Lesson
 
 @shared_task
@@ -22,7 +24,7 @@ def notify_subscribers_about_new_lesson(lesson_id):
             send_mail(
                 subject=f'Обновление курса {course.title}',
                 message=f'Добавлен урок: {lesson.title}',
-                from_email='noreply@example.com',
+                from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[sub.user.email],
                 fail_silently=True,
             )
