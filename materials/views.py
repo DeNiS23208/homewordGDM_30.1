@@ -15,6 +15,8 @@ from .stripe_service import (
     create_stripe_session,
 )
 from .models import Course, Payment, Lesson
+from .tasks import notify_subscribers_about_new_lesson
+from users.tasks import send_mass_mailing
 
 
 class CourseViewSet(ModelViewSet):
@@ -31,6 +33,17 @@ class CourseViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        last_lesson = instance.lesson_set.last()
+        if last_lesson:
+            notify_subscribers_about_new_lesson.delay(last_lesson.id)
+        send_mass_mailing.delay(
+            "Обновление курса",
+            "Курс был обновлён. Проверьте изменения.",
+            [self.request.user.email]
+        )
 
 
 class LessonListCreateAPIView(ListCreateAPIView):
