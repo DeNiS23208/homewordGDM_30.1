@@ -1,0 +1,40 @@
+name: CI/CD for Django with Docker
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Клонировать репозиторий
+        uses: actions/checkout@v3
+
+      - name: Установить Docker Compose
+        run: |
+          sudo apt update
+          sudo apt install docker-compose -y
+
+      - name: Запустить тесты
+        run: |
+          docker-compose -f docker-compose.yaml up -d db redis
+          sleep 10
+          docker-compose -f docker-compose.yaml run backend pytest
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Подключиться к серверу и задеплоить
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/homewordGDM_30.1
+            git pull origin develop
+            docker-compose down
+            docker-compose up -d --build
