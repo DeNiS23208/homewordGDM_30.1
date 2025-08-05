@@ -1,27 +1,15 @@
-"""
-Django settings for lms_project project.
-"""
-
 from pathlib import Path
-from dotenv import load_dotenv
 import os
 from celery.schedules import crontab
 
-# Загружаем переменные окружения
-load_dotenv()
-
-# Базовая директория
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Секретный ключ из .env
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-fallback-secret-key")
+# Получаем переменные из окружения (указаны в GitHub Secrets)
+SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-secret")
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
-# Режим отладки из .env
-DEBUG = os.getenv("DEBUG", "False") == "True"
-
-ALLOWED_HOSTS = []
-
-# Приложения проекта
+# Приложения
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -66,19 +54,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "lms_project.wsgi.application"
 
-# Настройки базы данных
+# Настройки БД из переменных окружения
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT"),
+        "NAME": os.environ.get("POSTGRES_DB", "postgres"),
+        "USER": os.environ.get("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
+        "HOST": os.environ.get("DB_HOST", "db"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
     }
 }
 
-# Валидаторы паролей
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -86,18 +73,15 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Язык и часовой пояс
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# Пути для статики и медиа
 STATIC_URL = "static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Django REST Framework
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -105,22 +89,18 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-# Пользовательская модель
 AUTH_USER_MODEL = "users.User"
 
-# Stripe API
-STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY", "")
 STRIPE_SUCCESS_URL = "http://localhost:8000/success/"
 STRIPE_CANCEL_URL = "http://localhost:8000/cancel/"
 
-# Celery
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
 
-# Celery Beat
 CELERY_BEAT_SCHEDULE = {
     "deactivate_users": {
         "task": "users.tasks.deactivate_inactive_users",
@@ -128,8 +108,6 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-# Email по умолчанию
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@example.com')
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@example.com")
 
-# Ключ по умолчанию для автополя
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

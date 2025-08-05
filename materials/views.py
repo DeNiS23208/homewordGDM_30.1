@@ -36,7 +36,7 @@ class CourseViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         instance = serializer.save()
-        last_lesson = instance.lesson_set.last()
+        last_lesson = instance.lessons.last()
         if last_lesson:
             notify_subscribers_about_new_lesson.delay(last_lesson.id)
         send_mass_mailing.delay(

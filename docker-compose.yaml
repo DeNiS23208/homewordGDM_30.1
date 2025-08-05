@@ -1,63 +1,45 @@
-version: "3.9"
+version: '3.8'
 
 services:
   backend:
     build: .
-    container_name: backend
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+    environment:
+      SECRET_KEY: dev-key
+      DEBUG: 'True'
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      STRIPE_API_KEY: sk_test_123456
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
       - db
       - redis
 
   db:
     image: postgres:15
-    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
-    restart: always
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
 
   redis:
     image: redis:7
-    container_name: redis
+    restart: always
     ports:
       - "6379:6379"
-    restart: always
-
-  celery:
-    build: .
-    container_name: celery
-    command: celery -A lms_project worker --loglevel=info
-    volumes:
-      - .:/app
-    env_file:
-      - .env
-    depends_on:
-      - redis
-      - db
-
-  celery_beat:
-    build: .
-    container_name: celery_beat
-    command: celery -A lms_project beat --loglevel=info
-    volumes:
-      - .:/app
-    env_file:
-      - .env
-    depends_on:
-      - redis
-      - db
 
 volumes:
   pgdata:
