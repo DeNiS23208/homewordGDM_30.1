@@ -1,7 +1,5 @@
 version: "3.9"
 
-env_file: .env
-
 services:
   backend:
     build: .
@@ -11,6 +9,8 @@ services:
       - .:/app
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     depends_on:
       - db
       - redis
@@ -41,6 +41,8 @@ services:
     command: celery -A lms_project worker --loglevel=info
     volumes:
       - .:/app
+    env_file:
+      - .env
     depends_on:
       - redis
       - db
@@ -51,6 +53,8 @@ services:
     command: celery -A lms_project beat --loglevel=info
     volumes:
       - .:/app
+    env_file:
+      - .env
     depends_on:
       - redis
       - db
