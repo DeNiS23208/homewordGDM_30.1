@@ -7,34 +7,53 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Клонировать репозиторий
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Установить Docker Compose
+      - name: Set up Docker Compose
         run: |
-          sudo apt update
-          sudo apt install docker-compose -y
+          sudo apt-get update
+          sudo apt-get install docker-compose -y
 
-      - name: Запустить тесты
-        run: |
-          docker-compose -f docker-compose.yaml up -d db redis
-          sleep 10
-          docker-compose -f docker-compose.yaml run backend pytest
+      - name: Build and run DB + Redis
+        run: docker-compose -f docker-compose.yaml up -d db redis
+        env:
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+
+      - name: Run migrations
+        run: docker-compose exec backend python manage.py migrate
+        env:
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+      - name: Run tests
+        run: docker-compose exec backend python manage.py test
+        env:
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/homework-ci-cd'
+
     steps:
-      - name: Подключиться к серверу и задеплоить
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ~/homewordGDM_30.1
-            git pull origin develop
+            cd /home/denis/homewordGDM_30.1
+            git pull origin homework-ci-cd
             docker-compose down
             docker-compose up -d --build
