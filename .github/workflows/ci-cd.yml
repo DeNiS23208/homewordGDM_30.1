@@ -25,7 +25,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
       - name: Run migrations
-        run: docker-compose exec backend python manage.py migrate
+        run: docker-compose run backend python manage.py migrate
         env:
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
