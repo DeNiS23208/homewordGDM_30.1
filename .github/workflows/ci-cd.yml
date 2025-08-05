@@ -2,7 +2,7 @@ name: CI/CD for Django with Docker
 
 on:
   push:
-    branches: [develop]
+    branches: '*'
 
 jobs:
   test:
