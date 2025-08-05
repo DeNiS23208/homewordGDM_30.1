@@ -68,15 +68,16 @@ WSGI_APPLICATION = "lms_project.wsgi.application"
 
 # Настройки базы данных
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT"),
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv("POSTGRES_DB", "postgres"),
+        'USER': os.getenv("POSTGRES_USER", "postgres"),
+        'PASSWORD': os.getenv("POSTGRES_PASSWORD", "postgres"),
+        'HOST': os.getenv("DB_HOST", "db"),  # ← ВАЖНО
+        'PORT': os.getenv("DB_PORT", "5432"),
     }
 }
+
 
 # Валидаторы паролей
 AUTH_PASSWORD_VALIDATORS = [
